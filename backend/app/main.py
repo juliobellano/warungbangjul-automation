@@ -6,8 +6,7 @@ from datetime import datetime, timedelta
 import uvicorn
 
 import json
-from bson.objectid import ObjectId
-from app.utils.helpers import json_serialize
+from app.utils.helpers import serialize_for_json
 
 from app.services.order_parser import parse_order
 from app.services.db import setup_database, save_order, get_orders, get_menu_items
@@ -62,9 +61,9 @@ async def startup_event():
     else:
         print("Database setup failed!")
 
-# Routes
 @app.post("/api/orders", status_code=201)
 async def create_order(order_input: OrderText):
+    """Process a new text order"""
     try:
         # Parse the order text
         order_data = parse_order(order_input.order_text)
@@ -72,18 +71,13 @@ async def create_order(order_input: OrderText):
         # Save to database
         order_id = await save_order(order_data)
         
-        # Get the saved order with any MongoDB-added fields (like _id)
-        saved_order = await orders_collection.find_one({"_id": ObjectId(order_id)})
-        
-        # Convert the MongoDB document to a dictionary and handle ObjectId serialization
-        serializable_order = json.loads(
-            json.dumps(saved_order, default=json_serialize)
-        )
+        # Serialize the response for JSON
+        serializable_order = serialize_for_json(order_data)
         
         return {
             "success": True,
-            "order_id": order_id,  # This is already a string from save_order
-            "order": serializable_order if saved_order else order_data
+            "order_id": order_id,
+            "order": serializable_order
         }
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
@@ -105,16 +99,27 @@ async def list_orders(
             start_date = end_date - timedelta(days=30)
             
         orders = await get_orders(start_date, end_date, status)
-        return {"orders": orders}
+
+        # Serialize orders for JSON response
+        serialized_orders = serialize_for_json(orders)
+
+        return {"orders": serialized_orders}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+
 
 @app.get("/api/menu")
 async def get_menu():
     """Get all menu items with their recipes"""
     try:
         menu = await get_menu_items()
-        return {"menu": menu}
+        
+        # Serialize menu for JSON response
+        serialized_menu = serialize_for_json(menu)
+        
+        return {"menu": serialized_menu}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
@@ -123,7 +128,11 @@ async def get_today_inventory_needs():
     """Calculate ingredients needed for today's orders"""
     try:
         today_needs = await calculate_today_ingredients()
-        return today_needs
+        
+        # Serialize todays_needs for JSON response
+        serialized_today_needs = serialize_for_json(today_needs)
+
+        return serialized_today_needs
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
@@ -132,7 +141,11 @@ async def get_inventory():
     """Get current inventory of all ingredients"""
     try:
         inventory = await get_ingredient_inventory()
-        return {"inventory": inventory}
+        
+        # Serialize inventory for JSON response
+        serialized_inventory = serialize_for_json(inventory)
+        
+        return {"inventory": serialized_inventory}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
@@ -142,7 +155,7 @@ async def update_inventory(updates: IngredientUpdates):
     try:
         result = await update_ingredient_inventory(updates.ingredients)
         if result["status"] == "success":
-            return result
+            return serialize_for_json(result)
         else:
             raise HTTPException(status_code=400, detail=result["message"])
     except Exception as e:
@@ -155,7 +168,7 @@ async def process_today_orders():
         result = await update_ingredients_from_today_orders()
         if result["status"] == "error":
             raise HTTPException(status_code=400, detail=result["message"])
-        return result
+        return serialize_for_json(result)
     except HTTPException:
         raise
     except Exception as e:

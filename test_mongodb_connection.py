@@ -74,7 +74,9 @@ async def test_post_order():
             
             print("\nRetrieved order from database:")
             pprint(retrieved_order)
-            
+        
+
+        
             # Clean up - delete the test order
             delete_result = await db.orders.delete_one({"_id": result.inserted_id})
             if delete_result.deleted_count == 1:
@@ -83,6 +85,8 @@ async def test_post_order():
                 print("\n⚠️ Warning: Could not delete test order")
                 
             return True
+        
+        
         else:
             print("❌ Failed to insert test order")
             return False
