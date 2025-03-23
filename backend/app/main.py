@@ -5,6 +5,10 @@ from typing import List, Dict, Optional, Union
 from datetime import datetime, timedelta
 import uvicorn
 
+import json
+from bson.objectid import ObjectId
+from app.utils.helpers import json_serialize
+
 from app.services.order_parser import parse_order
 from app.services.db import setup_database, save_order, get_orders, get_menu_items
 from app.services.inventory_calculator import (
@@ -12,6 +16,7 @@ from app.services.inventory_calculator import (
     get_ingredient_inventory,
     update_ingredient_inventory,
     update_ingredients_from_today_orders,
+    orders_collection,
 )
 
 # Create FastAPI app
@@ -60,7 +65,6 @@ async def startup_event():
 # Routes
 @app.post("/api/orders", status_code=201)
 async def create_order(order_input: OrderText):
-    """Process a new text order"""
     try:
         # Parse the order text
         order_data = parse_order(order_input.order_text)
@@ -68,10 +72,18 @@ async def create_order(order_input: OrderText):
         # Save to database
         order_id = await save_order(order_data)
         
+        # Get the saved order with any MongoDB-added fields (like _id)
+        saved_order = await orders_collection.find_one({"_id": ObjectId(order_id)})
+        
+        # Convert the MongoDB document to a dictionary and handle ObjectId serialization
+        serializable_order = json.loads(
+            json.dumps(saved_order, default=json_serialize)
+        )
+        
         return {
             "success": True,
-            "order_id": order_id,
-            "order": order_data
+            "order_id": order_id,  # This is already a string from save_order
+            "order": serializable_order if saved_order else order_data
         }
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))

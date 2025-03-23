@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from bson.objectid import ObjectId
 
 # Build path to .env
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent  # Adjust based on your file location
