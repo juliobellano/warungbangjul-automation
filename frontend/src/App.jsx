@@ -1,7 +1,12 @@
+console.log("React App component loaded");
+document.title = "React is working!";
+
 import React, { useState } from 'react';
 import OrderInput from './components/OrderInput';
 import Dashboard from './components/Dashboard';
 import InventoryPlanner from './components/InventoryPlanner';
+
+
 
 // UI Components (in real implementation, import from ShadCN UI)
 const Tabs = ({ defaultValue, children }) => {
