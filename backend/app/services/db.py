@@ -82,7 +82,7 @@ async def setup_database():
                     "name": "Sunny Side Up Egg",
                     "price": 15,
                     "ingredients": [
-                        {"name": "egg", "quantity": 1, "unit": "piece"},
+                        {"name": "chicken_egg", "quantity": 1, "unit": "piece"},
                         {"name": "oil", "quantity": 0.01, "unit": "liter"}
                     ]
                 }

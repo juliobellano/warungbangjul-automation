@@ -149,23 +149,7 @@ async def process_today_orders():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-@app.post("/api/analytics/sales")
-async def sales_analytics(date_range: DateRange):
-    """Get sales analytics for a specific date range"""
-    try:
-        analytics = await get_sales_analytics(date_range.start_date, date_range.end_date)
-        return {"analytics": analytics}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-@app.post("/api/analytics/profitability")
-async def profitability_analytics(date_range: DateRange):
-    """Get profitability metrics for a specific date range"""
-    try:
-        profitability = await calculate_profitability(date_range.start_date, date_range.end_date)
-        return {"profitability": profitability}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
