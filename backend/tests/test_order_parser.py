@@ -51,7 +51,7 @@ def test_ingredient_calculation():
             {"code": "SE", "quantity": 2},
             {"code": "T", "quantity": 1}
         ]
-    }
+    } 
     
     ingredients = calculate_ingredients_for_order(order)
     
@@ -77,5 +77,5 @@ def test_ingredient_calculation():
     assert ingredients["milk"] == 100  # 2 * 50
     
     # Check calculated ingredients for T (1 order)
-    assert ingredients["egg"] == 1  # 1 * 1
+    assert ingredients["chicken_egg"] == 1  # 1 * 1
     assert ingredients["oil"] == 0.01  # 1 * 0.01
