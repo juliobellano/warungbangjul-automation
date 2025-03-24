@@ -15,7 +15,6 @@ from app.services.inventory_calculator import (
     get_ingredient_inventory,
     update_ingredient_inventory,
     update_ingredients_from_today_orders,
-    orders_collection,
 )
 
 # Create FastAPI app
