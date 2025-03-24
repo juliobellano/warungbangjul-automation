@@ -65,7 +65,6 @@ const InventoryPlanner = () => {
   const [orderSummary, setOrderSummary] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('inventory');
   
   // Fetch data
   useEffect(() => {
