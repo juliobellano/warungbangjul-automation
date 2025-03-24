@@ -9,18 +9,7 @@
         }
       }
     ],
-    "routes": [
-      {
-        "src": "/static/(.*)",
-        "dest": "/static/$1"
-      },
-      {
-        "src": "/(.*\\.(js|json|css|ico|png|jpg|svg))",
-        "dest": "/$1"
-      },
-      {
-        "src": "/(.*)",
-        "dest": "/index.html"
-      }
+    "rewrites": [
+      { "source": "/(.*)", "destination": "/index.html" }
     ]
   }
