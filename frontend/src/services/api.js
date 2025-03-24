@@ -63,6 +63,15 @@ export const getSalesAnalytics = async (startDate = null, endDate = null) => {
   }
 };
 
+export const getTodayInventoryNeeds = async () => {
+  try {
+    const response = await api.get('/inventory/today');
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error;
+  }
+};
+
 export const getProfitabilityMetrics = async (startDate = null, endDate = null) => {
   try {
     const payload = {};
