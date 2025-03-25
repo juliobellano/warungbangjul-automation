@@ -27,7 +27,7 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://warungbangjul-automation-jq8g36ele.vercel.app/"],  # This allows all origins
+    allow_origins=["*"],  # This allows all origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -60,7 +60,7 @@ async def startup_event():
     else:
         print("Database setup failed!")
 
-@app.post("/api/orders", status_code=201)
+@app.post("/orders", status_code=201)
 async def create_order(order_input: OrderText):
     """Process a new text order"""
     try:
@@ -83,7 +83,7 @@ async def create_order(order_input: OrderText):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-@app.get("/api/orders")
+@app.get("/orders")
 async def list_orders(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
@@ -109,7 +109,7 @@ async def list_orders(
 
 
 
-@app.get("/api/menu")
+@app.get("/menu")
 async def get_menu():
     """Get all menu items with their recipes"""
     try:
@@ -122,7 +122,7 @@ async def get_menu():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-@app.get("/api/inventory/today")
+@app.get("/inventory/today")
 async def get_today_inventory_needs():
     """Calculate ingredients needed for today's orders"""
     try:
@@ -135,7 +135,7 @@ async def get_today_inventory_needs():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-@app.get("/api/inventory")
+@app.get("/inventory")
 async def get_inventory():
     """Get current inventory of all ingredients"""
     try:
@@ -148,7 +148,7 @@ async def get_inventory():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-@app.post("/api/inventory")
+@app.post("/inventory")
 async def update_inventory(updates: IngredientUpdates):
     """Update ingredient inventory with new values"""
     try:
@@ -160,7 +160,7 @@ async def update_inventory(updates: IngredientUpdates):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-@app.post("/api/inventory/process-today")
+@app.post("/inventory/process-today")
 async def process_today_orders():
     """Process today's orders and update inventory accordingly"""
     try:
