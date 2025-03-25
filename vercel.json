@@ -1,7 +1,12 @@
 {
-    "buildCommand": "cd frontend && npm run build",
-    "outputDirectory": "frontend/build",
     "builds": [
+      {
+        "src": "frontend/package.json",
+        "use": "@vercel/static-build",
+        "config": {
+          "zeroConfig": true
+        }
+      },
       {
         "src": "backend/api/index.py",
         "use": "@vercel/python",
@@ -15,4 +20,4 @@
       { "source": "/api/(.*)", "destination": "/backend/api/index.py" },
       { "source": "/(.*)", "destination": "/index.html" }
     ]
-  }
+}
