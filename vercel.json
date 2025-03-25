@@ -6,20 +6,17 @@
         "use": "@vercel/static-build",
         "config": {
           "buildCommand": "cd frontend && npm run build",
-          "outputDirectory": "frontend/build"
+          "outputDirectory": "build"
         }
       },
       {
         "src": "backend/api/index.py",
-        "use": "@vercel/python",
-        "config": {
-          "runtime": "python3.9"
-        }
+        "use": "@vercel/python"
       }
     ],
     "routes": [
       { "src": "/api/(.*)", "dest": "/backend/api/index.py" },
       { "handle": "filesystem" },
-      { "src": "/(.*)", "dest": "/frontend/build/index.html" }
+      { "src": "/(.*)", "dest": "/index.html" }
     ]
   }
