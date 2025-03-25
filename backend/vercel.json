@@ -14,7 +14,7 @@
       { "src": "/(.*)", "dest": "/api/index.py" }
     ],
     "env": {
-      "MONGODB_URL": "@MONGODB_URL",
+      "MONGODB_URL": "mongodb+srv://admin:c8X9xUpbUd27yfPD@flowerly.p0ess.mongodb.net/test?retryWrites=true&w=majority&appName=flowerly",
       "DB_NAME": "warung_bangjul",
       "ALLOWED_ORIGINS": "https://your-frontend-vercel-url.vercel.app"
     }
