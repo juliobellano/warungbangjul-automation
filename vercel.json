@@ -1,5 +1,4 @@
 {
-    "outputDirectory": "frontend/build",
     "builds": [
       {
         "src": "backend/api/index.py",
@@ -19,7 +18,6 @@
     ],
     "rewrites": [
       { "source": "/api/(.*)", "destination": "/backend/api/index.py" },
-      { "source": "/(.*)", "destination": "/frontend/build/$1" },
-      { "source": "/", "destination": "/frontend/build/index.html" }
+      { "source": "/(.*)", "destination": "/index.html" }
     ]
   }
