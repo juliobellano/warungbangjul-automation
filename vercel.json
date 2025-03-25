@@ -1,6 +1,17 @@
 {
     "outputDirectory": "frontend/build",
+    "builds": [
+      {
+        "src": "backend/api/index.py",
+        "use": "@vercel/python",
+        "config": {
+          "runtime": "python3.9",
+          "requirementsPath": "backend/requirements.txt"
+        }
+      }
+    ],
     "rewrites": [
+      { "source": "/api/(.*)", "destination": "/backend/api/index.py" },
       { "source": "/(.*)", "destination": "/index.html" }
     ]
-  }
+}
