@@ -2,47 +2,40 @@ import motor.motor_asyncio
 from pymongo import IndexModel, ASCENDING
 from datetime import datetime
 import os
-from dotenv import load_dotenv
-from pathlib import Path
 from bson.objectid import ObjectId
 from pymongo.errors import ServerSelectionTimeoutError
-
-
-# Build path to .env
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent  # Adjust based on your file location
-env_path = os.path.join(BASE_DIR, '.env')
-
-# Load environment variables
-load_dotenv(dotenv_path=env_path)
 
 # Get MongoDB connection string from environment variables
 MONGODB_URL = os.getenv("MONGODB_URL")
 DB_NAME = os.getenv("DB_NAME", "warung_bangjul")
 
+# Database connection pool
+_db_client = None
+_db = None
 
-# Create MongoDB client
-client = None
-
+# Get database client with lazy initialization
 def get_client():
-    global client
-    if client is None:
-        client = motor.motor_asyncio.AsyncIOMotorClient(
+    global _db_client
+    if _db_client is None:
+        if not MONGODB_URL:
+            raise ValueError("MONGODB_URL environment variable not set")
+        
+        _db_client = motor.motor_asyncio.AsyncIOMotorClient(
             MONGODB_URL, 
-            serverSelectionTimeoutMS=5000
+            serverSelectionTimeoutMS=5000,
+            maxPoolSize=10,
+            minPoolSize=1
         )
-    return client
+    return _db_client
 
+# Get database with lazy initialization
 def get_db():
-    return get_client()[DB_NAME]
+    global _db
+    if _db is None:
+        _db = get_client()[DB_NAME]
+    return _db
 
-# Test MongoDB Connection
-try:
-    client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
-except Exception as e:
-    print(e)
-
-# Collections
+# Get collection references
 def get_orders_collection():
     return get_db().orders
 
@@ -52,9 +45,14 @@ def get_menu_collection():
 def get_inventory_collection():
     return get_db().inventory
 
+# Database initialization and setup
 async def setup_database():
     """Set up database indexes and initial data if needed"""
     try:
+        db = get_db()
+        orders_collection = db.orders
+        menu_collection = db.menu
+        
         # Create indexes for better query performance
         order_indexes = [
             IndexModel([("customer_name", ASCENDING)]),
@@ -116,7 +114,7 @@ async def setup_database():
 async def save_order(order_data):
     """Save an order to the database"""
     try:
-        result = await orders_collection.insert_one(order_data)
+        result = await get_db().orders.insert_one(order_data)
         return str(result.inserted_id)
     except Exception as e:
         print(f"Error saving order: {e}")
@@ -136,7 +134,7 @@ async def get_orders(start_date=None, end_date=None, status=None):
         query["status"] = status
         
     try:
-        cursor = orders_collection.find(query)
+        cursor = get_db().orders.find(query)
         orders = await cursor.to_list(length=100)
         return orders
     except Exception as e:
@@ -146,7 +144,7 @@ async def get_orders(start_date=None, end_date=None, status=None):
 async def get_menu_items():
     """Get all menu items with their recipes"""
     try:
-        cursor = menu_collection.find({})
+        cursor = get_db().menu.find({})
         menu_items = await cursor.to_list(length=100)
         return menu_items
     except Exception as e:
@@ -156,8 +154,8 @@ async def get_menu_items():
 async def update_order_status(order_id, new_status):
     """Update the status of an order"""
     try:
-        result = await orders_collection.update_one(
-            {"_id": order_id},
+        result = await get_db().orders.update_one(
+            {"_id": ObjectId(order_id)},
             {"$set": {"status": new_status}}
         )
         return result.modified_count > 0

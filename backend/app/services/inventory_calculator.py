@@ -1,6 +1,6 @@
 from typing import Dict, List, Union
 from datetime import datetime
-from app.services.db import orders_collection, menu_collection, db
+from app.services.db import get_db
 
 async def calculate_today_ingredients() -> Dict[str, Dict]:
     """
@@ -9,6 +9,10 @@ async def calculate_today_ingredients() -> Dict[str, Dict]:
     Returns:
         Dictionary of ingredients with quantities needed for today's orders
     """
+    db = get_db()
+    orders_collection = db.orders
+    menu_collection = db.menu
+    
     # Define today's time range
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     tomorrow = today.replace(hour=23, minute=59, second=59, microsecond=999999)
@@ -88,6 +92,7 @@ async def update_ingredient_inventory(updates: Dict[str, Dict[str, Union[float, 
         Dictionary with status and message
     """
     # Create a reference to the ingredients collection
+    db = get_db()
     ingredients_collection = db.ingredients
     
     try:
@@ -135,6 +140,7 @@ async def get_ingredient_inventory() -> Dict:
         Dictionary containing all ingredients with their amounts and units
     """
     # Create a reference to the ingredients collection
+    db = get_db()
     ingredients_collection = db.ingredients
     
     try:
@@ -220,7 +226,7 @@ async def update_ingredients_from_today_orders() -> Dict:
         return {
             "status": update_status,
             "message": update_message,
-            "updated_ingredients": list(updates.keys()),
+            "updated_ingredients": list(updates.keys()) if updates else [],
             "insufficient_ingredients": insufficient_ingredients,
             "order_summary": today_data["order_summary"]
         }
