@@ -24,6 +24,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
 # Get allowed CORS origins from environment, or use * in development
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*")
 if ALLOWED_ORIGINS != "*":
@@ -32,13 +33,15 @@ if ALLOWED_ORIGINS != "*":
 else:
     origins = ["*"]
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["https://warungbangjulfrontend.vercel.app"],  # frontend URL
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
 
 # Models
 class OrderText(BaseModel):
