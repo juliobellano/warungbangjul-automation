@@ -5,6 +5,8 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 from bson.objectid import ObjectId
+from pymongo.errors import ServerSelectionTimeoutError
+
 
 # Build path to .env
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent  # Adjust based on your file location
@@ -19,9 +21,19 @@ DB_NAME = os.getenv("DB_NAME", "warung_bangjul")
 
 
 # Create MongoDB client
-client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URL)
-db = client[DB_NAME]
+client = None
 
+def get_client():
+    global client
+    if client is None:
+        client = motor.motor_asyncio.AsyncIOMotorClient(
+            MONGODB_URL, 
+            serverSelectionTimeoutMS=5000
+        )
+    return client
+
+def get_db():
+    return get_client()[DB_NAME]
 
 # Test MongoDB Connection
 try:
@@ -31,9 +43,14 @@ except Exception as e:
     print(e)
 
 # Collections
-orders_collection = db.orders
-menu_collection = db.menu
-inventory_collection = db.inventory
+def get_orders_collection():
+    return get_db().orders
+
+def get_menu_collection():
+    return get_db().menu
+
+def get_inventory_collection():
+    return get_db().inventory
 
 async def setup_database():
     """Set up database indexes and initial data if needed"""
