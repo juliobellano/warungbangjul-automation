@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Optional, Union
 from datetime import datetime, timedelta
 import uvicorn
+import os
 
 import json
 from app.utils.helpers import serialize_for_json
@@ -36,7 +37,7 @@ else:
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://warungbangjulfrontend.vercel.app"],  # frontend URL
+    allow_origins=["*"],  # frontend URL (set to *) to test
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
