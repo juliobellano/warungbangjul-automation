@@ -1,25 +1,25 @@
 {
+    "version": 2,
     "builds": [
       {
         "src": "frontend/package.json",
         "use": "@vercel/static-build",
         "config": {
           "buildCommand": "cd frontend && npm run build",
-          "outputDirectory": "build"
+          "outputDirectory": "frontend/build"
         }
       },
       {
         "src": "backend/api/index.py",
         "use": "@vercel/python",
         "config": {
-          "runtime": "python3.9",
-          "requirementsPath": "backend/requirements.txt"
+          "runtime": "python3.9"
         }
       }
     ],
     "routes": [
       { "src": "/api/(.*)", "dest": "/backend/api/index.py" },
-      { "src": "/(.*\\.(js|json|css|ico|png|jpg|svg)$)", "dest": "/frontend/build/$1" },
+      { "handle": "filesystem" },
       { "src": "/(.*)", "dest": "/frontend/build/index.html" }
     ]
   }
