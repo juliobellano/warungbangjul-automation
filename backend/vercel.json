@@ -14,7 +14,7 @@
       { "src": "/(.*)", "dest": "/api/index.py" }
     ],
     "env": {
-      "MONGODB_URL": "@mongodb_url",
+      "MONGODB_URL": "@MONGODB_URL",
       "DB_NAME": "warung_bangjul",
       "ALLOWED_ORIGINS": "https://your-frontend-vercel-url.vercel.app"
     }
