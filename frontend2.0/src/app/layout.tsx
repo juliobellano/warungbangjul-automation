@@ -67,7 +67,6 @@ function MainContent({ children }: { children: React.ReactNode }) {
                   <li><Link href="/" className="text-gray-500 hover:text-orange-500">Home</Link></li>
                   <li><Link href="/dashboard" className="text-gray-500 hover:text-orange-500">Dashboard</Link></li>
                   <li><Link href="/inventory" className="text-gray-500 hover:text-orange-500">Inventory</Link></li>
-                  <li><Link href="#" className="text-gray-500 hover:text-orange-500">Menu</Link></li>
                 </ul>
               </nav>
             </div>
@@ -80,12 +79,10 @@ function MainContent({ children }: { children: React.ReactNode }) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="md:flex md:justify-between md:items-center">
               <p className="text-center md:text-left text-gray-500">
-                Warung Bang Jul &copy; {new Date().getFullYear()}
+                Warung Bang Jul
               </p>
               <div className="mt-4 md:mt-0 hidden md:block">
                 <ul className="flex space-x-6 justify-center">
-                  <li><Link href="#" className="text-gray-500 hover:text-orange-500">Privacy Policy</Link></li>
-                  <li><Link href="#" className="text-gray-500 hover:text-orange-500">Terms of Service</Link></li>
                   <li><Link href="#" className="text-gray-500 hover:text-orange-500">Contact Us</Link></li>
                 </ul>
               </div>
