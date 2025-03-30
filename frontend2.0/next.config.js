@@ -2,7 +2,7 @@
 const nextConfig = {
   // Configure image domains if needed
   images: {
-    domains: [],
+    domains: ['res.cloudinary.com'],
   },
 };
 
