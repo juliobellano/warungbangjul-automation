@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 243, 244, 246;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+}
+
+/* Add smooth scrolling to the entire page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Add global transitions for interactive elements */
+button, a {
+  @apply transition-all duration-200;
+}
+
+/* Animation for card hover */
+@keyframes pulse-subtle {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.01);
+  }
+}
+
+.hover-pulse:hover {
+  animation: pulse-subtle 2s infinite;
+}
