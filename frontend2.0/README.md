@@ -53,8 +53,33 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Deployment on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Environment Variable Setup
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+When deploying to Vercel, make sure to set up the following environment variables:
+
+#### Public Variables (Exposed to Browser)
+These are automatically included in the client bundle and can be accessed on the client side:
+- `NEXT_PUBLIC_API_URL` - Your production API URL
+- `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` - Your Cloudinary cloud name
+- `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` - Your Cloudinary upload preset for client-side uploads
+
+#### Private Variables (Server-side Only)
+These are only available in Server Components, API Routes, and server-side code:
+- `CLOUDINARY_API_KEY` - Your Cloudinary API key
+- `CLOUDINARY_API_SECRET` - Your Cloudinary API secret
+
+To set these up in Vercel:
+1. Go to your project in the Vercel dashboard
+2. Navigate to Settings > Environment Variables
+3. Add each variable with the appropriate value
+4. Make sure to toggle "Production" for production deployment
+5. Click "Save" to apply your changes
+
+### Deployment Steps
+
+1. Push your code to GitHub
+2. Import the project in Vercel
+3. Configure environment variables as above
+4. Deploy!
