@@ -2,9 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Home, BarChart2, Package, Menu, X } from 'lucide-react';
+import { Home, BarChart2, Package, Menu, X, User } from 'lucide-react';
 
-export default function MobileNav() {
+interface MobileNavProps {
+  userName?: string;
+}
+
+export default function MobileNav({ userName }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -30,7 +34,14 @@ export default function MobileNav() {
       {/* Mobile navigation menu */}
       {isOpen && (
         <div className="fixed inset-0 bg-black/50 z-10 md:hidden">
-          <div className="absolute bottom-24 right-6 bg-white rounded-lg shadow-xl overflow-hidden w-48">
+          <div className="absolute bottom-24 right-6 bg-white rounded-lg shadow-xl overflow-hidden w-64">
+            {/* User name display if available */}
+            {userName && (
+              <div className="px-4 py-3 bg-gray-50 border-b flex items-center">
+                <User className="mr-2 text-gray-600" size={16} />
+                <span className="text-sm text-gray-700">Hello, {userName}</span>
+              </div>
+            )}
             <nav>
               <ul>
                 <li>
