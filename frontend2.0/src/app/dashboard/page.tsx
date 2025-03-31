@@ -121,34 +121,7 @@ export default function DashboardPage() {
     let totalIncome = 0;
     let matchedOrders = 0;
     
-    orders.forEach(order => {
-      console.log('Processing order:', {
-        id: order.id,
-        created_at: order.created_at,
-        total_price: order.total_price
-      });
-      
-      const orderDate = parseDate(order.created_at);
-      if (!orderDate) {
-        console.warn(`Invalid order date: ${order.created_at}`);
-        return;
-      }
-      
-      const orderDateStr = getISODateString(orderDate);
-      console.log(`Order ${order.id} date parsed to: ${orderDateStr}`);
-      
-      if (orderDateStr && dateMap.has(orderDateStr)) {
-        const dateData = dateMap.get(orderDateStr);
-        dateData.orders += 1;
-        dateData.income += order.total_price;
-        totalOrders += 1;
-        totalIncome += order.total_price;
-        matchedOrders += 1;
-        console.log(`Order ${order.id} matched to date ${orderDateStr}, new count: ${dateData.orders}`);
-      } else {
-        console.warn(`Order ${order.id} date ${orderDateStr} not in range`);
-      }
-    });
+
     
     console.log(`Processed ${orders.length} orders, matched ${matchedOrders} to date range`);
     
