@@ -34,21 +34,6 @@ export const formatIngredientAmount = (
   return `${amount} ${unit}`;
 };
 
-/**
- * Group orders by date
- */
-export const groupOrdersByDate = (
-  orders: Order[]
-): { [date: string]: Order[] } => {
-  return orders.reduce((acc, order) => {
-    const date = new Date(order.created_at).toDateString();
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-    acc[date].push(order);
-    return acc;
-  }, {} as { [date: string]: Order[] });
-};
 
 /**
  * Calculate total for orders in a period
