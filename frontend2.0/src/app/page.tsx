@@ -5,8 +5,10 @@ import { useUser } from '@/services/UserContext';
 import { submitOrder, getOrders } from '@/services/api';
 import { useApiCall } from '@/services/useApi';
 import { OrderResponse, Order } from '@/services/types';
-import { Minus, Plus, ShoppingCart, Trash2, CheckCircle, AlertCircle, Clock, User, Package, Loader2 } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, Trash2, CheckCircle, AlertCircle, Clock, User, Package, Loader2, Calendar, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 // Menu items from the backend (normally would fetch this from API)
 const MENU_ITEMS = [
@@ -106,11 +108,28 @@ export default function Home() {
   const [todaysOrders, setTodaysOrders] = useState<Order[]>([]);
   const [isMenuLoading, setIsMenuLoading] = useState<boolean>(true);
   
+  // Date range picker states
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [isCustomDateRange, setIsCustomDateRange] = useState<boolean>(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  
   const submitOrderApi = useApiCall<OrderResponse, [string]>(submitOrder);
   const getOrdersApi = useApiCall<Order[], [Date | null, Date | null, string | null]>(getOrders);
   
-  // Fetch today's orders on component mount
+  // Initialize dates to today's range
   useEffect(() => {
+    // Set default date range to today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    setStartDate(today);
+    setEndDate(endOfDay);
+    
     fetchTodaysOrders();
     
     // Simulate menu loading for demonstration
@@ -123,6 +142,7 @@ export default function Home() {
   
   // Fetch today's orders from the API
   const fetchTodaysOrders = async () => {
+    setApiError(null);
     try {
       // Start date: beginning of today (midnight)
       const today = new Date();
@@ -132,18 +152,61 @@ export default function Home() {
       const endOfDay = new Date();
       endOfDay.setHours(23, 59, 59, 999);
       
+      setStartDate(today);
+      setEndDate(endOfDay);
+      setIsCustomDateRange(false);
+      
       const orders = await getOrdersApi.execute(today, endOfDay, null);
       if (orders && orders.length > 0) {
         console.log('Today\'s orders fetched:', orders);
-        console.log('First order sample structure:', orders[0]);
-        console.log('Total price property:', orders[0].total_price);
-        console.log('Total amount property:', (orders[0] as any).total_amount);
-        console.log('Available properties:', Object.keys(orders[0]));
         setTodaysOrders(orders);
+      } else {
+        setTodaysOrders([]);
       }
     } catch (error) {
       console.error('Error fetching today\'s orders:', error);
+      setApiError(error instanceof Error ? error.message : 'Failed to fetch today\'s orders');
+      setTodaysOrders([]);
     }
+  };
+  
+  // Fetch orders by custom date range
+  const fetchOrdersByDateRange = async () => {
+    if (!startDate || !endDate) return;
+    
+    setApiError(null);
+    try {
+      // Make sure end date has time set to end of day
+      const endOfSelectedDay = new Date(endDate);
+      endOfSelectedDay.setHours(23, 59, 59, 999);
+      
+      // Make sure start date has time set to beginning of day
+      const startOfSelectedDay = new Date(startDate);
+      startOfSelectedDay.setHours(0, 0, 0, 0);
+      
+      const orders = await getOrdersApi.execute(startOfSelectedDay, endOfSelectedDay, null);
+      if (orders) {
+        setTodaysOrders(orders);
+        setIsCustomDateRange(true);
+        setShowDatePicker(false);
+      } else {
+        setTodaysOrders([]);
+      }
+    } catch (error) {
+      console.error('Error fetching orders by date range:', error);
+      setApiError(error instanceof Error ? error.message : 'Failed to fetch orders for selected date range');
+      setTodaysOrders([]);
+    }
+  };
+  
+  // Format date for display
+  const formatDate = (date: Date | null): string => {
+    if (!date) return '';
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
   };
   
   // Calculate cart totals
@@ -250,20 +313,23 @@ export default function Home() {
     if (!dateString) return 'Unknown time';
     
     try {
+      // Parse the date
       const date = new Date(dateString);
+      
       // Check if date is valid
       if (isNaN(date.getTime())) {
+        console.error('Invalid date received:', dateString);
         return 'Invalid date';
       }
       
-      // Format as HH:MM AM/PM
-      return date.toLocaleTimeString([], { 
+      // MongoDB already using Taiwan time, so we don't need to convert
+      return date.toLocaleTimeString('en-US', { 
         hour: '2-digit', 
         minute: '2-digit',
-        hour12: true 
+        hour12: true
       });
     } catch (error) {
-      console.error('Error formatting date:', error);
+      console.error('Error formatting date:', error, dateString);
       return 'Unknown time';
     }
   };
@@ -610,26 +676,123 @@ export default function Home() {
       {/* Today's Orders Section */}
       <section aria-labelledby="orders-heading" className="mt-16">
         <div className="flex justify-between items-center mb-6">
-          <h2 id="orders-heading" className="text-2xl font-bold text-gray-900">Today's Orders</h2>
-          <button 
-            onClick={fetchTodaysOrders}
-            disabled={getOrdersApi.isLoading}
-            className="flex items-center text-sm text-blue-600 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded-md px-2 py-1 disabled:opacity-50"
-            aria-label="Refresh orders list"
-          >
-            {getOrdersApi.isLoading ? (
-              <Loader2 size={16} className="mr-1 animate-spin" aria-hidden="true" />
-            ) : (
-              <Clock size={16} className="mr-1" aria-hidden="true" />
-            )}
-            {getOrdersApi.isLoading ? 'Loading...' : 'Refresh'}
-          </button>
+          <h2 id="orders-heading" className="text-2xl font-bold text-gray-900">
+            {isCustomDateRange 
+              ? `Orders: ${formatDate(startDate)} - ${formatDate(endDate)}`
+              : "Today's Orders"}
+          </h2>
+          
+          <div className="flex space-x-2">
+            {/* Date Picker Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setShowDatePicker(!showDatePicker)}
+                className="flex items-center text-sm bg-white border border-gray-300 rounded-md px-3 py-1.5 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                aria-label="Select date range"
+              >
+                <Calendar size={16} className="mr-2 text-gray-500" />
+                <span className="text-gray-700">
+                  {isCustomDateRange 
+                    ? `${formatDate(startDate)} - ${formatDate(endDate)}`
+                    : "Today"}
+                </span>
+                <ChevronDown size={14} className="ml-2 text-gray-500" />
+              </button>
+              
+              {showDatePicker && (
+                <div className="absolute right-0 mt-1 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-4">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Start Date
+                      </label>
+                      <DatePicker
+                        selected={startDate}
+                        onChange={(date: Date | null) => setStartDate(date)}
+                        selectsStart
+                        startDate={startDate}
+                        endDate={endDate}
+                        maxDate={new Date()}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        dateFormat="MMM d, yyyy"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        End Date
+                      </label>
+                      <DatePicker
+                        selected={endDate}
+                        onChange={(date: Date | null) => setEndDate(date)}
+                        selectsEnd
+                        startDate={startDate}
+                        endDate={endDate}
+                        minDate={startDate || undefined}
+                        maxDate={new Date()}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        dateFormat="MMM d, yyyy"
+                      />
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <button
+                        onClick={fetchTodaysOrders}
+                        className="text-sm text-gray-600 hover:text-gray-800 focus:outline-none"
+                      >
+                        Reset to Today
+                      </button>
+                      
+                      <button
+                        onClick={fetchOrdersByDateRange}
+                        disabled={!startDate || !endDate || getOrdersApi.isLoading}
+                        className="px-4 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {getOrdersApi.isLoading ? (
+                          <>
+                            <Loader2 size={14} className="inline-block mr-1 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          'Apply Filter'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <button 
+              onClick={fetchTodaysOrders}
+              disabled={getOrdersApi.isLoading}
+              className="flex items-center text-sm text-blue-600 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded-md px-2 py-1 disabled:opacity-50"
+              aria-label="Refresh orders list"
+            >
+              {getOrdersApi.isLoading ? (
+                <Loader2 size={16} className="mr-1 animate-spin" aria-hidden="true" />
+              ) : (
+                <Clock size={16} className="mr-1" aria-hidden="true" />
+              )}
+              {getOrdersApi.isLoading ? 'Loading...' : 'Refresh'}
+            </button>
+          </div>
         </div>
+        
+        {/* Display API error if present */}
+        {apiError && (
+          <Alert 
+            type="error" 
+            title="Error Loading Orders" 
+            message={apiError}
+            onDismiss={() => setApiError(null)}
+          />
+        )}
         
         {getOrdersApi.isLoading ? (
           <div className="bg-white p-12 rounded-lg shadow-sm text-center">
             <Loader2 size={30} className="animate-spin mx-auto text-orange-500 mb-4" />
-            <p className="text-gray-500">Loading today's orders...</p>
+            <p className="text-gray-500">Loading orders...</p>
           </div>
         ) : getOrdersApi.error ? (
           <div className="bg-white p-8 rounded-lg shadow-sm">
@@ -638,7 +801,7 @@ export default function Home() {
               <p className="text-red-600 font-medium">Failed to load orders</p>
               <p className="text-gray-500 text-sm mt-1 mb-4">{getOrdersApi.error.message}</p>
               <button
-                onClick={fetchTodaysOrders}
+                onClick={isCustomDateRange ? fetchOrdersByDateRange : fetchTodaysOrders}
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
               >
                 Try Again
@@ -695,23 +858,14 @@ export default function Home() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="px-2 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                            {(order as any).total_amount || order.total_price || '0'}
+                            {order.total_amount || order.total_price || '0'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <Clock size={14} className="text-gray-400 mr-1 flex-shrink-0" />
                             <span className="text-sm text-gray-600">
-                              {(() => {
-                                try {
-                                  return new Date(order.created_at).toLocaleTimeString([], { 
-                                    hour: '2-digit', 
-                                    minute: '2-digit'
-                                  });
-                                } catch (e) {
-                                  return 'Unknown time';
-                                }
-                              })()}
+                              {formatTime(order.order_date)}
                             </span>
                           </div>
                         </td>
@@ -735,21 +889,12 @@ export default function Home() {
                       <div className="font-medium">{order.customer_name}</div>
                       <div className="text-xs text-gray-500 flex items-center mt-0.5">
                         <Clock size={12} className="mr-1" />
-                        {(() => {
-                          try {
-                            return new Date(order.created_at).toLocaleTimeString([], { 
-                              hour: '2-digit', 
-                              minute: '2-digit'
-                            });
-                          } catch (e) {
-                            return 'Unknown time';
-                          }
-                        })()}
+                        {formatTime(order.order_date)}
                       </div>
                     </div>
                     <div className="ml-auto">
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                        {(order as any).total_amount || order.total_price || '0'}
+                        {order.total_amount || order.total_price || '0'}
                       </span>
                     </div>
                   </div>

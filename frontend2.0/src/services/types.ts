@@ -4,8 +4,9 @@ export interface Order {
   customer_name: string;
   items: OrderItem[];
   total_price: number;
-  created_at: string;
+  order_date: string;
   status: string;
+  total_amount?: number;
 }
 
 export interface OrderItem {
