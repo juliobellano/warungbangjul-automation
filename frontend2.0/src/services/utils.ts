@@ -34,7 +34,6 @@ export const formatIngredientAmount = (
   return `${amount} ${unit}`;
 };
 
-
 /**
  * Calculate total for orders in a period
  */
