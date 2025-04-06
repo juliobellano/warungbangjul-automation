@@ -4,18 +4,15 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Optional, Union
 from datetime import datetime, timedelta
 import uvicorn
+import asyncio
 
 import json
 from app.utils.helpers import serialize_for_json
 
 from app.services.order_parser import parse_order
 from app.services.db import setup_database, save_order, get_orders, get_menu_items
-from app.services.inventory_calculator import (
-    calculate_today_ingredients,
-    get_ingredient_inventory,
-    update_ingredient_inventory,
-    update_ingredients_from_today_orders,
-)
+from app.services.image_service import start_cleanup_task
+from app.routers import inventory
 
 # Create FastAPI app
 app = FastAPI(
@@ -32,6 +29,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(inventory.router)
 
 # Models
 class OrderText(BaseModel):
@@ -59,6 +59,9 @@ async def startup_event():
         print("Database setup complete.")
     else:
         print("Database setup failed!")
+    
+    # Start background task for cleaning up old images
+    asyncio.create_task(start_cleanup_task())
 
 @app.post("/api/orders", status_code=201)
 async def create_order(order_input: OrderText):
@@ -105,9 +108,6 @@ async def list_orders(
         return {"orders": serialized_orders}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
-
-
 
 @app.get("/api/menu")
 async def get_menu():
@@ -172,8 +172,6 @@ async def process_today_orders():
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
-
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
