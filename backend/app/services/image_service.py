@@ -209,29 +209,50 @@ def map_detections_to_ingredients(detections: List[Dict], defaults: List[Dict]) 
     # Create lookup dictionary from defaults
     default_lookup = {item["ingredient_name"]: item for item in defaults}
     
-    # Map detections to ingredients
-    ingredients = []
+    # Count instances of each ingredient
+    ingredient_counts = {}
+    ingredient_confidences = {}  # Track highest confidence for each ingredient
     
     for detection in detections:
         ingredient_name = detection["class_name"]
         confidence = detection["confidence"]
         
+        # Increment count
+        if ingredient_name in ingredient_counts:
+            ingredient_counts[ingredient_name] += 1
+            # Keep the highest confidence score
+            if confidence > ingredient_confidences[ingredient_name]:
+                ingredient_confidences[ingredient_name] = confidence
+        else:
+            ingredient_counts[ingredient_name] = 1
+            ingredient_confidences[ingredient_name] = confidence
+    
+    # Map counts to ingredients with proper quantities
+    ingredients = []
+    
+    for ingredient_name, count in ingredient_counts.items():
         # Get default quantity if available
         if ingredient_name in default_lookup:
             default = default_lookup[ingredient_name]
+            
+            # Calculate total quantity based on count and default
+            total_quantity = default["default_quantity"] * count
+            
             ingredients.append({
                 "ingredient_name": ingredient_name,
-                "confidence": confidence,
-                "suggested_quantity": default["default_quantity"],
-                "unit": default["unit"]
+                "confidence": ingredient_confidences[ingredient_name],
+                "suggested_quantity": total_quantity,
+                "unit": default["unit"],
+                "count": count  # Adding count for transparency
             })
         else:
             # If no default available, use placeholder values
             ingredients.append({
                 "ingredient_name": ingredient_name,
-                "confidence": confidence,
-                "suggested_quantity": 1.0,
-                "unit": "unit"
+                "confidence": ingredient_confidences[ingredient_name],
+                "suggested_quantity": count,  # Use count as quantity
+                "unit": "unit",
+                "count": count  # Adding count for transparency
             })
     
     return ingredients

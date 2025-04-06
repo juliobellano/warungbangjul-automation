@@ -199,6 +199,8 @@ async def confirm_inventory_update(
         # Process the updates
         processed_updates = {}
         
+
+
         # Check if we have the detection format (with "ingredients" key)
         if "ingredients" in updates and isinstance(updates["ingredients"], list):
             # Convert from detection format to the expected update format
@@ -206,7 +208,11 @@ async def confirm_inventory_update(
                 if "ingredient_name" in ingredient:
                     # Use 1 as default quantity to add, or you can use suggested_quantity if present
                     quantity = ingredient.get("suggested_quantity", 1)
-                    processed_updates[ingredient["ingredient_name"]] = 1  # Or quantity if you want to use actual values
+                    processed_updates[ingredient["ingredient_name"]] = quantity  # Or quantity if you want to use actual values
+
+                    print(f"Raw detected ingredient: {ingredient}")
+                    print(f"Suggested quantity: {ingredient.get('suggested_quantity')}")
+                    print(f"Final quantity to add: {quantity}")
         else:
             # Already in the correct format
             processed_updates = updates
