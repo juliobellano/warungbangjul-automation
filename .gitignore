@@ -1,6 +1,7 @@
 .env
 frontend/node_modules
 backend/.env
+backend/venv
 computer-vision
 frontendnextjs
 frontendnextjs/src/services/.env

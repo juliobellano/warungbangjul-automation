@@ -13,6 +13,12 @@ from app.services.order_parser import parse_order
 from app.services.db import setup_database, save_order, get_orders, get_menu_items
 from app.services.image_service import start_cleanup_task
 from app.routers import inventory
+from app.services.inventory_calculator import (
+    calculate_today_ingredients,
+    get_ingredient_inventory,
+    update_ingredient_inventory,
+    update_ingredients_from_today_orders,
+)
 
 # Create FastAPI app
 app = FastAPI(
@@ -21,12 +27,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-from app.services.inventory_calculator import (
-    calculate_today_ingredients,
-    get_ingredient_inventory,
-    update_ingredient_inventory,
-    update_ingredients_from_today_orders,
-)
+
 
 # Configure CORS
 app.add_middleware(
