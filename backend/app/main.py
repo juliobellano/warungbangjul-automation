@@ -21,6 +21,13 @@ app = FastAPI(
     version="1.0.0"
 )
 
+from app.services.inventory_calculator import (
+    calculate_today_ingredients,
+    get_ingredient_inventory,
+    update_ingredient_inventory,
+    update_ingredients_from_today_orders,
+)
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,

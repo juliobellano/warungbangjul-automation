@@ -6,6 +6,9 @@ import os
 from datetime import datetime
 import shutil
 
+from app.services.models.yolo_model import TEMP_DIR
+
+
 from app.models.inventory import (
     InventoryItem, 
     InventoryResponse, 
@@ -151,19 +154,26 @@ async def get_detected_ingredients(detection_id: str):
 
 
 @router.get("/image/{image_id}")
-async def get_image(image_id: str):
-    """Get an image by ID"""
+async def get_image(image_id: str, annotated: bool = True):
+    """Get an image by ID
+    
+    Args:
+        image_id: The ID of the image
+        annotated: Whether to return the annotated version (default: True)
+    """
     try:
-        # Determine if this is an original or annotated image
-        if image_id.endswith("_annotated"):
-            # Get annotated image path
-            base_id = image_id.replace("_annotated", "")
-            image_path = await get_annotated_image_path(base_id)
+        if annotated:
+            # Look for annotated image in the predict folder
+            image_path = TEMP_DIR / "predict" / f"{image_id}.jpg"
+            
+            # If annotated doesn't exist, fall back to original
+            if not image_path.exists():
+                image_path = await get_image_path(image_id)
         else:
-            # Get original image path
+            # Get original image
             image_path = await get_image_path(image_id)
         
-        if not image_path:
+        if not image_path or not image_path.exists():
             raise HTTPException(status_code=404, detail=f"Image with ID {image_id} not found")
         
         # Return file response
@@ -176,8 +186,6 @@ async def get_image(image_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
-
 @router.post("/update/{detection_id}")
 async def confirm_inventory_update(
     detection_id: str,

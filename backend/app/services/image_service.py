@@ -142,21 +142,21 @@ async def process_image(image_id: str, defaults: List[Dict]) -> Dict:
         }
     
     # Generate annotated image path
-    annotated_image_id = f"{image_id}_annotated"
+    annotated_image_id = f"{image_id}"
     annotated_image_path = TEMP_DIR / f"{annotated_image_id}.jpg"
     
     # Create annotated image
     _ = predict(str(image_path), save=True)
     
-    # Find where YOLO saved the file and move to our desired location
-    pred_path = TEMP_DIR / Path(image_path).name
-    if pred_path.exists():
-        shutil.move(str(pred_path), str(annotated_image_path))
-    else:
-        # Try alternative location
-        pred_path = Path(TEMP_DIR) / "runs" / "detect" / "predict" / Path(image_path).name
-        if pred_path.exists():
-            shutil.move(str(pred_path), str(annotated_image_path))
+    # Create annotated image
+    _ = predict(str(image_path), save=True)
+
+    # Record that the annotated image will be in the predict folder
+    annotated_image_path = TEMP_DIR / "predict" / Path(image_path).name
+
+    # Don't need to move the file anymore, just note where it is
+    predicted_exists = (TEMP_DIR / "predict" / Path(image_path).name).exists()
+    print(f"Annotated image expected at: {annotated_image_path}, exists: {predicted_exists}")
     
     # Extract detected classes from results
     result = results[0]
@@ -287,7 +287,7 @@ async def get_annotated_image_path(detection_id: str) -> Optional[Path]:
         return None
     
     annotated_image_id = result["annotated_image_id"]
-    file_path = TEMP_DIR / f"{annotated_image_id}.jpg"
+    file_path = TEMP_DIR / "predict"/ f"{annotated_image_id}.jpg"
     
     if file_path.exists():
         return file_path

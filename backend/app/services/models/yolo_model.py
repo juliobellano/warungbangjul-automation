@@ -44,7 +44,6 @@ def predict(image_path, conf=0.8, save=False, output_path=None):
             conf=conf,
             save=save,
             save_txt=save,
-            save_crop=save,
             line_width=2,
             show_labels=True,
             show_conf=True,

@@ -175,4 +175,3 @@ Here's a step-by-step walkthrough of the final workflow:
    - Test with previously unseen ingredients
    - **Validation**: System handles all cases appropriately
 
-This incremental approach ensures you're building a robust system with validation at each step, making it easier to identify and fix issues early in the development process.

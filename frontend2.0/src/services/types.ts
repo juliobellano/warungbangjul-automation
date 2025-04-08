@@ -89,3 +89,40 @@ export interface ProcessTodayOrdersResponse {
     };
   };
 } 
+
+// CV interface
+export interface DetectedIngredient {
+  ingredient_name: string;
+  confidence: number;
+  suggested_quantity: number;
+  unit: string;
+  count?: number;
+  isAdjusted?: boolean; // UI state flag
+}
+
+export interface DetectionResult {
+  detection_id: string;
+  ingredients: DetectedIngredient[];
+  image_url: string;
+  timestamp: string;
+}
+
+export interface DetectionUploadResponse {
+  detection_id: string;
+  message: string;
+}
+
+export interface DetectionUpdateResponse {
+  success: boolean;
+  message: string;
+  update_result: {
+    success: boolean;
+    updated_count: number;
+    results: Record<string, {
+      success: boolean;
+      message: string;
+      new_quantity: number;
+      unit: string;
+    }>
+  }
+}

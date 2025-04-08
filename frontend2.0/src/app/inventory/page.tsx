@@ -5,6 +5,8 @@ import { Clock, Drumstick, Egg, Check } from 'lucide-react';
 import InventoryItem from '@/components/InventoryItem';
 import { getTodayInventoryNeeds } from '@/services/api';
 import { useApiCall } from '@/services/useApi';
+import Link from 'next/link';
+import { Camera } from 'lucide-react';
 
 // Abbreviate units helper function (from InventoryPlanner.jsx)
 const abbreviateUnit = (unit: string): string => {
@@ -204,6 +206,14 @@ export default function InventoryPage() {
           </button>
           <div className="text-gray-500 bg-white px-4 py-2 rounded-lg shadow-sm">
             <span>Updated: {new Date().toLocaleTimeString()}</span>
+
+          <Link 
+            href="/inventory/detection"
+            className="bg-green-50 text-green-600 border border-green-100 px-4 py-2 rounded-lg hover:bg-green-100 transition-colors flex items-center"
+          >
+            <Camera className="mr-2" size={20} />
+            <span>CV Detection</span>
+          </Link>
           </div>
         </div>
       </div>
