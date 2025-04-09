@@ -1,4 +1,3 @@
-'''
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Body, Form
 from fastapi.responses import FileResponse
 from typing import Dict, List, Optional, Union, Any
@@ -8,8 +7,6 @@ from datetime import datetime
 import shutil
 
 from app.services.models.yolo_model import TEMP_DIR
-
-
 
 from app.models.inventory import (
     InventoryItem, 
@@ -21,13 +18,8 @@ from app.models.inventory import (
 )
 
 from app.services.db import (
-    get_inventory_items,
-    get_inventory_item,
-    update_inventory_item,
     update_multiple_inventory_items,
-    get_ingredient_default_quantities,
-    get_ingredient_default,
-    update_ingredient_default
+    get_ingredient_default_quantities
 )
 
 from app.services.image_service import (
@@ -39,65 +31,15 @@ from app.services.image_service import (
     delete_image
 )
 
-router = APIRouter(
-    prefix="/api/inventory",
-    tags=["inventory"],
+# CV-specific router
+cv_router = APIRouter(
+    prefix="/api/inventoryCV",
+    tags=["inventoryCV"],
     responses={404: {"description": "Not found"}},
 )
 
-
-@router.get("/", response_model=InventoryResponse)
-async def get_inventory():
-    """Get all inventory items"""
-    try:
-        inventory_items = await get_inventory_items()
-        return {"inventory": inventory_items}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
-
-@router.get("/{ingredient_name}")
-async def get_ingredient(ingredient_name: str):
-    """Get a specific inventory item by name"""
-    try:
-        item = await get_inventory_item(ingredient_name)
-        if not item:
-            raise HTTPException(status_code=404, detail=f"Ingredient '{ingredient_name}' not found")
-        return item
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
-
-@router.put("/{ingredient_name}")
-async def update_ingredient(ingredient_name: str, update: InventoryItemUpdate):
-    """Update a specific inventory item"""
-    try:
-        result = await update_inventory_item(ingredient_name, update.quantity_to_add)
-        if not result["success"]:
-            raise HTTPException(status_code=404, detail=result["message"])
-        return result
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
-
-@router.put("/")
-async def update_inventory(updates: InventoryBatchUpdate):
-    """Update multiple inventory items at once"""
-    try:
-        # Convert from model to dict of ingredient_name: quantity_to_add
-        updates_dict = {name: update.quantity_to_add for name, update in updates.updates.items()}
-        
-        result = await update_multiple_inventory_items(updates_dict)
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
-
-@router.post("/upload")
+# Computer Vision specific endpoints
+@cv_router.post("/upload")
 async def upload_image(file: UploadFile = File(...)):
     """Upload an image for processing"""
     try:
@@ -129,8 +71,7 @@ async def upload_image(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-
-@router.get("/detected/{detection_id}")
+@cv_router.get("/detected/{detection_id}")
 async def get_detected_ingredients(detection_id: str):
     """Get detected ingredients from an uploaded image"""
     try:
@@ -141,7 +82,7 @@ async def get_detected_ingredients(detection_id: str):
             raise HTTPException(status_code=404, detail=f"Detection result with ID {detection_id} not found")
         
         # Get the base URL for image
-        base_url = f"/api/inventory/image/{result['annotated_image_id']}"
+        base_url = f"/api/inventoryCV/image/{result['annotated_image_id']}"
         
         return {
             "detection_id": detection_id,
@@ -154,8 +95,7 @@ async def get_detected_ingredients(detection_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-
-@router.get("/image/{image_id}")
+@cv_router.get("/image/{image_id}")
 async def get_image(image_id: str, annotated: bool = True):
     """Get an image by ID
     
@@ -188,7 +128,8 @@ async def get_image(image_id: str, annotated: bool = True):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-@router.post("/update/{detection_id}")
+
+@cv_router.post("/update/{detection_id}")
 async def confirm_inventory_update(
     detection_id: str,
     updates: Dict[str, Any] = Body(..., description="Dictionary of ingredients to update in format {ingredient_name: quantity_to_add} OR detection result format with ingredients array")
@@ -209,8 +150,6 @@ async def confirm_inventory_update(
         # Process the updates
         processed_updates = {}
         
-
-
         # Check if we have the detection format (with "ingredients" key)
         if "ingredients" in updates and isinstance(updates["ingredients"], list):
             # Convert from detection format to the expected update format
@@ -245,53 +184,4 @@ async def confirm_inventory_update(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
-
-@router.get("/defaults")
-async def get_defaults():
-    """Get all default quantities for ingredients"""
-    try:
-        defaults = await get_ingredient_default_quantities()
-        return {"defaults": defaults}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
-
-@router.get("/defaults/{ingredient_name}")
-async def get_default(ingredient_name: str):
-    """Get default quantity for a specific ingredient"""
-    try:
-        default = await get_ingredient_default(ingredient_name)
-        if not default:
-            raise HTTPException(status_code=404, detail=f"Default quantity for '{ingredient_name}' not found")
-        return default
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
-
-@router.put("/defaults/{ingredient_name}")
-async def update_default(
-    ingredient_name: str,
-    default_quantity: float,
-    unit: str,
-    packaging_description: Optional[str] = None
-):
-    """Update default quantity for a specific ingredient"""
-    try:
-        default_data = {
-            "ingredient_name": ingredient_name,
-            "default_quantity": default_quantity,
-            "unit": unit
-        }
-        
-        if packaging_description:
-            default_data["packaging_description"] = packaging_description
-        
-        result = await update_ingredient_default(ingredient_name, default_data)
-        return result
-    except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}") 
-        '''

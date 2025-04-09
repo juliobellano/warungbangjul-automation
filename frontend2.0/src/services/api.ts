@@ -69,7 +69,7 @@ export const getMenu = async () => {
   }
 };
 
-// API functions for inventory
+// Regular inventory functions
 export const getTodayInventoryNeeds = async () => {
   try {
     const response = await api.get('/inventory/today');
@@ -110,13 +110,13 @@ export const processTodayOrders = async () => {
   }
 };
 
-// API to upload ingredients image for detection
+// Computer Vision specific functions
 export const uploadImageForDetection = async (file: File) => {
   try {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await api.post('/inventory/upload', formData, {
+    const response = await api.post('/inventoryCV/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       }
@@ -128,11 +128,9 @@ export const uploadImageForDetection = async (file: File) => {
   }
 };
 
-
-// Get detection results by detection ID
 export const getDetectionResults = async (detectionId: string) => {
   try {
-    const response = await api.get(`/inventory/detected/${detectionId}`);
+    const response = await api.get(`/inventoryCV/detected/${detectionId}`);
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError;
@@ -140,15 +138,13 @@ export const getDetectionResults = async (detectionId: string) => {
   }
 };
 
-// Get image URL (helper function)
 export const getAnnotatedImageUrl = (imageId: string): string => {
-  return `${API_BASE_URL}/inventory/image/${imageId}`;
+  return `${API_BASE_URL}/inventoryCV/image/${imageId}`;
 };
 
-// Confirm detected ingredients and update inventory
 export const confirmDetectionUpdate = async (detectionId: string, ingredients: any[]) => {
   try {
-    const response = await api.post(`/inventory/update/${detectionId}`, {
+    const response = await api.post(`/inventoryCV/update/${detectionId}`, {
       ingredients
     });
     return response.data;

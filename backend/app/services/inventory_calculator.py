@@ -1,6 +1,7 @@
 from typing import Dict, List, Union
 from datetime import datetime
-from app.services.db import orders_collection, menu_collection, db
+from app.services.db import get_orders, get_menu_items
+
 
 async def calculate_today_ingredients() -> Dict[str, Dict]:
     """
@@ -14,8 +15,7 @@ async def calculate_today_ingredients() -> Dict[str, Dict]:
     tomorrow = today.replace(hour=23, minute=59, second=59, microsecond=999999)
     
     # Get all menu items with their recipes
-    cursor = menu_collection.find({})
-    menu_items = await cursor.to_list(length=None)
+    menu_items = await get_menu_items()
     
     # Create recipe lookup dictionary
     recipes = {}
@@ -29,9 +29,7 @@ async def calculate_today_ingredients() -> Dict[str, Dict]:
         }
     
     # Query to get today's orders
-    query = {"order_date": {"$gte": today, "$lte": tomorrow}}
-    cursor = orders_collection.find(query)
-    today_orders = await cursor.to_list(length=None)
+    today_orders = await get_orders(today, tomorrow)
     
     # Count today's ordered items
     item_counts = {}
