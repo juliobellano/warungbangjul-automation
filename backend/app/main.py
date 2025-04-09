@@ -12,7 +12,7 @@ from app.utils.helpers import serialize_for_json
 from app.services.order_parser import parse_order
 from app.services.db import setup_database, save_order, get_orders, get_menu_items
 from app.services.image_service import start_cleanup_task
-from app.routers import inventory
+#from app.routers import inventory
 from app.services.inventory_calculator import (
     calculate_today_ingredients,
     get_ingredient_inventory,
@@ -39,7 +39,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(inventory.router)
+#app.include_router(inventory.router)
 
 # Models
 class OrderText(BaseModel):

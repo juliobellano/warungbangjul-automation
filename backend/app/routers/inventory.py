@@ -1,3 +1,4 @@
+'''
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Body, Form
 from fastapi.responses import FileResponse
 from typing import Dict, List, Optional, Union, Any
@@ -293,3 +294,4 @@ async def update_default(
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}") 
+        '''
