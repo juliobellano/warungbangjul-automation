@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Home, BarChart2, Package, Menu, X, User } from 'lucide-react';
+import { Camera } from 'lucide-react';
+
 
 interface MobileNavProps {
   userName?: string;
@@ -72,6 +74,16 @@ export default function MobileNav({ userName }: MobileNavProps) {
                   >
                     <Package className="mr-2 text-gray-600" size={20} />
                     <span>Inventory</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/inventory/detection"
+                    className="flex items-center px-4 py-3 hover:bg-gray-100 transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Camera className="mr-2 text-gray-600" size={20} />
+                    <span>Inventory Detection</span>
                   </Link>
                 </li>
               </ul>
