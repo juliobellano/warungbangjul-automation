@@ -31,7 +31,7 @@ def get_model(model_path=None):
     
     return _model
 
-def predict(image_path, conf=0.8, save=False, output_path=None):
+def predict(image_path, conf=0.7, save=False, output_path=None):
     """Run prediction with YOLO model."""
     model = get_model()
     if model is None:
