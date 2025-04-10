@@ -2,7 +2,7 @@
 
 [phases.setup]
 # Add apt packages needed for OpenCV
-aptPkgs = ["libgl1-mesa-glx", "libglib2.0-0"]
+aptPkgs = ["libgl1"]
 
 # You might only need libgl1-mesa-glx, but libglib2.0-0 is also commonly needed by OpenCV
 # Try with just libgl1-mesa-glx first if you prefer minimal dependencies.
