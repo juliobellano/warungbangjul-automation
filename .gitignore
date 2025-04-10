@@ -12,3 +12,4 @@ frontend2.0/.env
 frontend2.0/src/services/.env
 **/.jpg
 **/.jpeg
+backend/temp_images/predict/labels
