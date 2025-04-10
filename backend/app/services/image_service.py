@@ -141,21 +141,14 @@ async def process_image(image_id: str, defaults: List[Dict]) -> Dict:
             "message": "No objects detected in the image"
         }
     
-    # Generate annotated image path
-    annotated_image_id = f"{image_id}"
-    annotated_image_path = TEMP_DIR / f"{annotated_image_id}.jpg"
-    
-    # Create annotated image
-    _ = predict(str(image_path), save=True)
-    
-    # Create annotated image
+    # Create annotated image (with save=True to save the annotated image)
     _ = predict(str(image_path), save=True)
 
     # Record that the annotated image will be in the predict folder
-    annotated_image_path = TEMP_DIR / "predict" / Path(image_path).name
+    annotated_image_path = TEMP_DIR / "predict" / f"{image_id}.jpg"
 
-    # Don't need to move the file anymore, just note where it is
-    predicted_exists = (TEMP_DIR / "predict" / Path(image_path).name).exists()
+    # Check if the annotated image exists
+    predicted_exists = annotated_image_path.exists()
     print(f"Annotated image expected at: {annotated_image_path}, exists: {predicted_exists}")
     
     # Extract detected classes from results
@@ -182,7 +175,7 @@ async def process_image(image_id: str, defaults: List[Dict]) -> Dict:
     result_data = {
         "detection_id": image_id,
         "ingredients": detected_ingredients,
-        "annotated_image_id": annotated_image_id,
+        "annotated_image_id": image_id,  # Use the actual image ID
         "timestamp": datetime.now()
     }
     

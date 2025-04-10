@@ -105,7 +105,7 @@ async def get_image(image_id: str, annotated: bool = True):
     """
     try:
         if annotated:
-            # Look for annotated image in the predict folder
+            # Look for image using the original ID in the predict folder
             image_path = TEMP_DIR / "predict" / f"{image_id}.jpg"
             
             # If annotated doesn't exist, fall back to original
@@ -118,11 +118,11 @@ async def get_image(image_id: str, annotated: bool = True):
         if not image_path or not image_path.exists():
             raise HTTPException(status_code=404, detail=f"Image with ID {image_id} not found")
         
-        # Return file response
+        # Return file response with the consistent name for the frontend
         return FileResponse(
             path=str(image_path),
             media_type="image/jpeg",
-            filename=f"{image_id}.jpg"
+            filename="image0.jpg"  # Always return as image0.jpg to frontend
         )
     except HTTPException:
         raise
