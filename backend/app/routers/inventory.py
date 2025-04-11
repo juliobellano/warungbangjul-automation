@@ -178,9 +178,6 @@ async def confirm_inventory_update(
         # Update inventory with confirmed quantities
         update_result = await update_multiple_inventory_items(processed_updates)
         
-        # Delete the images (both original and annotated)
-        await delete_image(detection_id)
-        await delete_image(result["annotated_image_id"])
         
         return {
             "success": True,
