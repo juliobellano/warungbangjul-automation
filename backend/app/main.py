@@ -11,7 +11,6 @@ from app.utils.helpers import serialize_for_json
 
 from app.services.order_parser import parse_order
 from app.services.db import setup_database, save_order, get_orders, get_menu_items
-from app.services.image_service import start_cleanup_task
 from app.routers import inventory
 from app.services.inventory_calculator import (
     calculate_today_ingredients,
@@ -66,8 +65,6 @@ async def startup_event():
     else:
         print("Database setup failed!")
     
-    # Start background task for cleaning up old images
-    asyncio.create_task(start_cleanup_task())
 
 @app.post("/api/orders", status_code=201)
 async def create_order(order_input: OrderText):

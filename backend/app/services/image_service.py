@@ -4,8 +4,8 @@ import shutil
 from pathlib import Path
 from typing import Dict, List, Optional, Union, Any
 from datetime import datetime, timedelta
-import asyncio
 import time
+
 
 # Import direct YOLO functions
 from app.services.models.yolo_model import predict, TEMP_DIR
@@ -17,37 +17,6 @@ if not os.path.exists(TEMP_DIR):
 
 # Storage for detection results
 detection_results = {}
-
-async def cleanup_old_images():
-    """Clean up images older than 30 minutes"""
-    try:
-        # Get current time
-        now = datetime.now()
-        
-        # Check all files in temp directory
-        for file_path in TEMP_DIR.glob("*"):
-            if file_path.is_file():
-                # Get file modification time
-                mod_time = datetime.fromtimestamp(file_path.stat().st_mtime)
-                
-                # If file is older than 30 minutes, delete it
-                if now - mod_time > timedelta(minutes=30):
-                    os.remove(file_path)
-                    print(f"Cleaned up old file: {file_path}")
-                    
-        # Clean up old detection results
-        to_delete = []
-        for detection_id, result in detection_results.items():
-            if now - result["timestamp"] > timedelta(minutes=30):
-                to_delete.append(detection_id)
-                
-        for detection_id in to_delete:
-            del detection_results[detection_id]
-            print(f"Cleaned up old detection result: {detection_id}")
-                
-    except Exception as e:
-        print(f"Error cleaning up old images: {e}")
-
 
 async def save_uploaded_image(file_data: bytes) -> str:
     """
@@ -68,12 +37,8 @@ async def save_uploaded_image(file_data: bytes) -> str:
     # Save file
     with open(file_path, "wb") as f:
         f.write(file_data)
-    
-    # Schedule cleanup
-    asyncio.create_task(cleanup_old_images())
-    
+        
     return image_id
-
 
 async def get_image_path(image_id: str) -> Optional[Path]:
     """
@@ -91,25 +56,6 @@ async def get_image_path(image_id: str) -> Optional[Path]:
         return file_path
     
     return None
-
-
-async def delete_image(image_id: str) -> bool:
-    """
-    Delete a temporarily stored image
-    
-    Args:
-        image_id: Unique ID for the image
-        
-    Returns:
-        True if deleted successfully, False otherwise
-    """
-    file_path = TEMP_DIR / f"{image_id}.jpg"
-    
-    if file_path.exists():
-        os.remove(file_path)
-        return True
-    
-    return False
 
 
 async def process_image(image_id: str, defaults: List[Dict]) -> Dict:
@@ -222,6 +168,7 @@ def map_detections_to_ingredients(detections: List[Dict], defaults: List[Dict]) 
     
     # Map counts to ingredients with proper quantities
     ingredients = []
+
     
     for ingredient_name, count in ingredient_counts.items():
         # Get default quantity if available
@@ -288,9 +235,3 @@ async def get_annotated_image_path(detection_id: str) -> Optional[Path]:
     return None
 
 
-# Start a background task to periodically clean up old images
-async def start_cleanup_task():
-    """Start a background task for periodic cleanup"""
-    while True:
-        await cleanup_old_images()
-        await asyncio.sleep(300)  # Run every 5 minutes 

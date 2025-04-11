@@ -5,8 +5,10 @@ from pydantic import BaseModel
 import os
 from datetime import datetime
 import shutil
+import time
 
-from app.services.models.yolo_model import TEMP_DIR
+from app.services.models.yolo_model import TEMP_DIR, delete_all_temp_images
+
 
 from app.models.inventory import (
     InventoryItem, 
@@ -28,7 +30,6 @@ from app.services.image_service import (
     get_detection_result,
     get_image_path,
     get_annotated_image_path,
-    delete_image
 )
 
 # CV-specific router
@@ -124,6 +125,11 @@ async def get_image(image_id: str, annotated: bool = True):
             media_type="image/jpeg",
             filename="image0.jpg"  # Always return as image0.jpg to frontend
         )
+    
+        #delete all the photos
+        #asyncio.create_task(delayed_cleanup())
+
+
     except HTTPException:
         raise
     except Exception as e:
@@ -185,3 +191,4 @@ async def confirm_inventory_update(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}") 
+
