@@ -40,7 +40,7 @@ def get_model(model_path=None):
             log_memory_usage("Before loading model")
             _model = YOLO(model_path)
             log_memory_usage("After loading model")
-            print(f"Model loaded from: {model_path}")
+            #print(f"Model loaded from: {model_path}")
         except Exception as e:
             print(f"Error loading model: {e}")
             return None
@@ -49,10 +49,8 @@ def get_model(model_path=None):
 
 def predict(image_path, conf=0.7, save=False, output_path=None):
     """Run prediction with YOLO model."""
-    log_memory_usage("Before model load")
     
     model = get_model()
-    log_memory_usage("After model load")
     
     if model is None:
         return None
@@ -106,8 +104,7 @@ def predict(image_path, conf=0.7, save=False, output_path=None):
                 # Copy the latest plotted image to the target filename
                 shutil.copy2(latest_image, target_filename)
                 
-                print(f"Saved annotated image for {image_id} at {target_filename}")
-                #delete_all_temp_images()
+                #print(f"Saved annotated image for {image_id} at {target_filename}")
                 asyncio.create_task(delayed_cleanup())
 
             else:
@@ -123,7 +120,7 @@ def predict(image_path, conf=0.7, save=False, output_path=None):
                 target_filename = PREDICT_DIR / f"{image_id}.jpg"
                 cv2.imwrite(str(target_filename), result_img)
                 
-                print(f"Manually saved annotated image for {image_id} at {target_filename}")
+                #print(f"Manually saved annotated image for {image_id} at {target_filename}")
             log_memory_usage("After saving annotated image")
         
         return results
@@ -132,59 +129,6 @@ def predict(image_path, conf=0.7, save=False, output_path=None):
         import traceback
         traceback.print_exc()
         return None 
-
-def cleanup_prediction_files(older_than_minutes=1):
-    """Clean up prediction files older than the specified time"""
-    log_memory_usage("Before cleanup")
-    try:
-        # Get current time
-        now = datetime.datetime.now()
-        
-        # Check all files in predict directory
-        cleaned_count = 0
-        for file_path in PREDICT_DIR.glob("*"):
-            if file_path.is_file():
-                # Get file modification time
-                mod_time = datetime.datetime.fromtimestamp(file_path.stat().st_mtime)
-                
-                # If file is older than specified minutes, delete it
-                if now - mod_time > datetime.timedelta(minutes=older_than_minutes):
-                    os.remove(file_path)
-                    cleaned_count += 1
-        
-        if cleaned_count > 0:
-            print(f"Cleaned up {cleaned_count} old prediction files")
-        
-        log_memory_usage("After cleanup")
-        return cleaned_count
-    except Exception as e:
-        print(f"Error cleaning up prediction files: {e}")
-        return 0 
-
-def delete_prediction_file(image_id: str) -> bool:
-    """
-    Delete a prediction image from the predict directory
-    
-    Args:
-        image_id: ID of the image to delete
-        
-    Returns:
-        True if deleted successfully, False otherwise
-    """
-    log_memory_usage(f"Before deleting prediction for {image_id}")
-    
-    # Path to the prediction file
-    file_path = PREDICT_DIR / f"{image_id}.jpg"
-    
-    # Delete if it exists
-    if file_path.exists():
-        os.remove(file_path)
-        print(f"Deleted prediction file: {file_path}")
-        log_memory_usage(f"After deleting prediction for {image_id}")
-        return True
-    
-    log_memory_usage(f"After checking prediction for {image_id} (not found)")
-    return False 
 
 def delete_all_temp_images():
     """Delete all image files in both TEMP_DIR and PREDICT_DIR"""

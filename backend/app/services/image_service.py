@@ -79,7 +79,7 @@ async def process_image(image_id: str, defaults: List[Dict]) -> Dict:
         }
     
     # Run prediction with YOLO
-    results = predict(str(image_path))
+    results = predict(str(image_path), save=True)
     
     if not results or len(results) == 0:
         return {
@@ -87,15 +87,14 @@ async def process_image(image_id: str, defaults: List[Dict]) -> Dict:
             "message": "No objects detected in the image"
         }
     
-    # Create annotated image (with save=True to save the annotated image)
-    _ = predict(str(image_path), save=True)
-
     # Record that the annotated image will be in the predict folder
     annotated_image_path = TEMP_DIR / "predict" / f"{image_id}.jpg"
 
     # Check if the annotated image exists
+    '''
     predicted_exists = annotated_image_path.exists()
     print(f"Annotated image expected at: {annotated_image_path}, exists: {predicted_exists}")
+    '''
     
     # Extract detected classes from results
     result = results[0]
