@@ -5,6 +5,7 @@ This project solves the problem of wasting hours manually counting inventory, or
 ## 🌐 Live Demo
 
 Visit the application at: [warungbangjul](https://warungbangjul.vercel.app)
+
 Computer vision demo: [demo](https://www.linkedin.com/posts/juliobellano_update-your-inventory-database-without-touching-activity-7316416432475361281-Yt53/?utm_source=share&utm_medium=member_ios&rcm=ACoAADagySwBbxd9S9B1tXYFqsTHtIVucwd6j20)
 
 ## 📋 Overview
