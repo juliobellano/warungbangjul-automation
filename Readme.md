@@ -42,7 +42,7 @@ An end-to-end automation system for restaurant operations, from order processing
 - Format: "Customer Quantity+ItemCode" (e.g., "John 2SE + 1T")
 - Automatic order calculation and validation
 
-### Order Processing v1.0
+### Order Processing v2.0
 - 3 Clicks to finish an order
 - Automatic order and payment calculations.
 
