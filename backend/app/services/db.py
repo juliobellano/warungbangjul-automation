@@ -160,20 +160,6 @@ async def get_menu_items():
         print(f"Error retrieving menu: {e}")
         raise
 
-async def update_order_status(order_id, new_status):
-    """Update the status of an order"""
-    try:
-        result = await orders_collection.update_one(
-            {"_id": order_id},
-            {"$set": {"status": new_status}}
-        )
-        return result.modified_count > 0
-    except Exception as e:
-        print(f"Error updating order status: {e}")
-        raise
-
-# New inventory management functions
-
 async def initialize_inventory_from_menu():
     """Initialize inventory collection with ingredients from menu"""
     try:
@@ -327,25 +313,6 @@ async def initialize_default_quantities():
         print(f"Error initializing default quantities: {e}")
         return False
 
-async def get_inventory_items():
-    """Get all inventory items"""
-    try:
-        cursor = inventory_collection.find({})
-        inventory_items = await cursor.to_list(length=None)
-        return inventory_items
-    except Exception as e:
-        print(f"Error retrieving inventory: {e}")
-        raise
-
-async def get_inventory_item(ingredient_name: str):
-    """Get a specific inventory item by name"""
-    try:
-        item = await inventory_collection.find_one({"ingredient_name": ingredient_name})
-        return item
-    except Exception as e:
-        print(f"Error retrieving inventory item: {e}")
-        raise
-
 async def update_inventory_item(ingredient_name: str, quantity_to_add: float):
     """Update quantity of a specific inventory item"""
     try:
@@ -408,33 +375,4 @@ async def get_ingredient_default_quantities():
         return defaults
     except Exception as e:
         print(f"Error retrieving default quantities: {e}")
-        raise
-
-async def get_ingredient_default(ingredient_name: str):
-    """Get default quantity for a specific ingredient"""
-    try:
-        default = await ingredient_defaults_collection.find_one({"ingredient_name": ingredient_name})
-        return default
-    except Exception as e:
-        print(f"Error retrieving default quantity: {e}")
-        raise
-
-async def update_ingredient_default(ingredient_name: str, default_data: Dict[str, Any]):
-    """Update default quantity for a specific ingredient"""
-    try:
-        # Ensure the last_updated field is set
-        default_data["last_updated"] = datetime.now()
-        
-        result = await ingredient_defaults_collection.update_one(
-            {"ingredient_name": ingredient_name},
-            {"$set": default_data},
-            upsert=True
-        )
-        
-        return {
-            "success": True,
-            "message": f"Updated default quantity for {ingredient_name}"
-        }
-    except Exception as e:
-        print(f"Error updating default quantity: {e}")
         raise
