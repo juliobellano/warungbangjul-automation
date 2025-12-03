@@ -15,7 +15,7 @@ An end-to-end automation system for restaurant operations, from order processing
 ## 🛠️ Tech Stack
 
 ### Frontend 1.0 (Deprecated)
-- **React** - UI library
+- **React** - Library
 - **Tailwind CSS** - Utility-first CSS framework
 - **Recharts** - Responsive chart components
 - **Axios** - HTTP client for API requests
@@ -23,7 +23,6 @@ An end-to-end automation system for restaurant operations, from order processing
 ### Frontend 2.0 (Current)
 - **Next.js** - Framework
 - **Typescript** 
-- **React** - UI library
 - **Tailwind CSS** - Utility-first CSS framework
 - **Axios** - HTTP client for API requests
 
